@@ -4,7 +4,7 @@ import prettier from "prettier/standalone";
 import htmlParser from "prettier/parser-html";
 import cssParser from "prettier/parser-postcss";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-// import { htmlToJsx } from "html-to-jsx-transform";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 const App = () => {
   const [htmlValue, setHtmlValue] = useState("");
@@ -12,6 +12,8 @@ const App = () => {
   const [extractedHtml, setExtractedHtml] = useState("");
   const [displayhtml, setdisplayhtml] = useState("");
   const [activedisplay, setActiveDisplay] = useState("html");
+
+  // /highlighting for html code
 
   const extractCssFromHtml = () => {
     const tempElement = document.createElement("div");
@@ -136,26 +138,45 @@ const App = () => {
 
     // Convert styles to camelCase with quotes
 
-    jsx = jsx.replace(/style=(["'])(.*?)\1/g, (_, quote, styles) => {
-      const camelCasedStyles = styles.replace(/-(\w)/g, (_, letter) =>
-        letter.toUpperCase()
-      );
-
-      console.log(camelCasedStyles);
-      const styleProperties = camelCasedStyles
-        .split(";")
-        .map((prop) => prop.trim())
-        .filter((prop) => prop !== "");
-      const quotedStyles = styleProperties
-        .map((property) => {
-          const [key, value] = property
-            .split(/:\s+/) // use colon followed by whitespace as separator
-            .map((prop) => prop.trim());
-          return `${key}: ${isNaN(value) ? `"${value}"` : value}`;
-        })
-        .join(", ");
-      return `style={{ ${quotedStyles} }}`;
-    });
+    jsx = jsx
+      .replace(/style=(["'])(.*?)\1/g, (_, quote, styles) => {
+        // extract the url function and replace it with a placeholder
+        let urlFunction = "";
+        styles = styles.replace(/url\((.*?)\)/g, (_, url) => {
+          urlFunction = url;
+          return "url(PLACEHOLDER)";
+        });
+        const camelCasedStyles = styles.replace(/-(\w)/g, (_, letter) =>
+          letter.toUpperCase()
+        );
+        const styleProperties = camelCasedStyles
+          .split(";")
+          .map((prop) => prop.trim())
+          .filter((prop) => prop !== "");
+        let quotedStyles = styleProperties
+          .map((property) => {
+            const [key, value] = property
+              .split(/:\s+/) // use colon followed by whitespace as separator
+              .map((prop) => prop.trim());
+            return `${key}: ${isNaN(value) ? `"${value}"` : value}`;
+          })
+          .join(", ");
+        // put back the url function and replace the placeholder
+        quotedStyles = quotedStyles.replace(
+          "url(PLACEHOLDER)",
+          `url(${urlFunction})`
+        );
+        return `style={{ ${quotedStyles} }}`;
+      })
+      .replace(/url\("([^"]*)"\)/g, (_, url) => {
+        // replace commas with semicolons in the url function
+        const fixedUrl = url.replace(/,/g, ";").trim(); // remove whitespace after semicolon
+        return `url("${fixedUrl}")`;
+      })
+      .replace(/url\("([^"]*)"\)/g, (_, url) => {
+        // replace double quotes with single quotes in the url function
+        return `url('${url}')`;
+      });
 
     return jsx;
   }
@@ -180,9 +201,11 @@ const App = () => {
 
   const copyHTML = () => {
     navigator.clipboard
-      .writeText(extractedHtml)
+      .writeText(displayhtml)
       .then(() => {
-        window.alert("HTML code successfully copied.");
+        window.alert(
+          `${activedisplay.toUpperCase()} code successfully copied.`
+        );
       })
       .catch((err) => {
         console.error("Failed to copy element: ", err);
@@ -219,7 +242,7 @@ const App = () => {
                 </button>
               </div>
               {extractedCss && (
-                <SyntaxHighlighter language="css">
+                <SyntaxHighlighter language="css" style={vscDarkPlus}>
                   {extractedCss}
                 </SyntaxHighlighter>
               )}
@@ -239,7 +262,7 @@ const App = () => {
                 </button>
               </div>
               {displayhtml && (
-                <SyntaxHighlighter language={activedisplay}>
+                <SyntaxHighlighter language={activedisplay} style={vscDarkPlus}>
                   {displayhtml}
                 </SyntaxHighlighter>
               )}

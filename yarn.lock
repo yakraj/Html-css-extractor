@@ -7774,6 +7774,11 @@ react-error-overlay@^6.0.11:
   resolved "https://registry.yarnpkg.com/react-error-overlay/-/react-error-overlay-6.0.11.tgz#92835de5841c5cf08ba00ddd2d677b6d17ff9adb"
   integrity sha512-/6UZ2qgEyH2aqzYZgQPxEnz33NJ2gNsnHA2o5+o4wW9bLM/JYQitNP9xPhsXwC08hMMovfGe/8retsdDsczPRg==
 
+react-highlight-within-textarea@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/react-highlight-within-textarea/-/react-highlight-within-textarea-3.2.1.tgz#abb608c3bb6f33b551d81f898c8b2e8870f2534b"
+  integrity sha512-ettN+GQfNLg6zCcpatsT9yhgpwEh5dV+tRKEmZu9+DnvLL7t1Bm/0wZ2tTC+G7wAZngJ2HbMlusJXR6v3Cs4PQ==
+
 react-is@^16.13.1:
   version "16.13.1"
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
