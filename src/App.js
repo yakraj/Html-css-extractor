@@ -4,8 +4,8 @@ import prettier from "prettier/standalone";
 import htmlParser from "prettier/parser-html";
 import cssParser from "prettier/parser-postcss";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+// import { htmlToJsx } from "html-to-jsx-transform";
 
-import { htmlToJsx } from "html-to-jsx-transform";
 const App = () => {
   const [htmlValue, setHtmlValue] = useState("");
   const [extractedCss, setExtractedCss] = useState("");
@@ -130,8 +130,39 @@ const App = () => {
     );
   };
 
+  function convertHtmlToJsx(html) {
+    // Replace class with className
+    let jsx = html.replace(/class=/g, "className=");
+
+    // Convert styles to camelCase with quotes
+
+    jsx = jsx.replace(/style=(["'])(.*?)\1/g, (_, quote, styles) => {
+      const camelCasedStyles = styles.replace(/-(\w)/g, (_, letter) =>
+        letter.toUpperCase()
+      );
+
+      console.log(camelCasedStyles);
+      const styleProperties = camelCasedStyles
+        .split(";")
+        .map((prop) => prop.trim())
+        .filter((prop) => prop !== "");
+      const quotedStyles = styleProperties
+        .map((property) => {
+          const [key, value] = property
+            .split(/:\s+/) // use colon followed by whitespace as separator
+            .map((prop) => prop.trim());
+          return `${key}: ${isNaN(value) ? `"${value}"` : value}`;
+        })
+        .join(", ");
+      return `style={{ ${quotedStyles} }}`;
+    });
+
+    return jsx;
+  }
+
   const SelectJSX = () => {
-    const jsx = htmlToJsx(extractedHtml);
+    const jsx = convertHtmlToJsx(extractedHtml);
+    // const jsx = htmlToJsx(extractedHtml);
     setdisplayhtml(jsx);
     setActiveDisplay("jsx");
   };
